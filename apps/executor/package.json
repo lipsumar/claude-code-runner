@@ -1,20 +1,19 @@
 {
-  "name": "backend",
+  "name": "executor-server",
   "version": "1.0.0",
   "license": "UNLICENSED",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "build-image": "docker build . -t claude-executor-image"
   },
   "devDependencies": {
-    "@types/dockerode": "^3.3.38",
     "@types/express": "^5.0.1",
     "typescript": "~5.8.0"
   },
   "dependencies": {
-    "axios": "^1.9.0",
     "body-parser": "^2.2.0",
-    "dockerode": "^4.0.6",
+    "execa": "^9.5.3",
     "express": "^5.1.0"
   }
 }
