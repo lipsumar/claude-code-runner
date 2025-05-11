@@ -16,9 +16,9 @@ export const instancesRouter = router({
       docker,
     });
     await instance.createContainer();
-    addInstance(instance);
+    const id = await addInstance(instance);
     return {
-      id: instance.getPort(),
+      id,
       status: "created",
     };
   }),
@@ -29,10 +29,10 @@ export const instancesRouter = router({
         id: z.string(),
       })
     )
-    .query(({ input }) => {
-      const instance = getInstance(input.id);
+    .query(async ({ input }) => {
+      const instance = await getInstance(input.id);
       return {
-        id: instance.getPort(),
+        id: input.id,
         status: instance.getStatus(),
       };
     }),
@@ -43,15 +43,15 @@ export const instancesRouter = router({
         id: z.string(),
       })
     )
-    .mutation(({ input }) => {
-      const instance = getInstance(input.id);
+    .mutation(async ({ input }) => {
+      const instance = await getInstance(input.id);
       instance.stopAndRemoveContainer();
-      removeInstance(input.id);
+      await removeInstance(input.id);
       return { status: "removed" };
     }),
 
-  list: publicProcedure.query(() => {
-    const instances = listInstances();
+  list: publicProcedure.query(async () => {
+    const instances = await listInstances();
     return instances.map((instance) => ({
       id: instance.id,
       status: instance.instance.getStatus(),

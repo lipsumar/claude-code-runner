@@ -15,12 +15,15 @@
     "@types/express": "^5.0.1",
     "eslint": "^9.26.0",
     "globals": "^16.1.0",
+    "prisma": "^6.7.0",
     "typescript": "~5.8.0",
     "typescript-eslint": "^8.32.0"
   },
   "dependencies": {
+    "@prisma/client": "^6.7.0",
     "@trpc/client": "^11.1.2",
     "@trpc/server": "^11.1.2",
+    "@types/node": "^22.15.17",
     "axios": "^1.9.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
