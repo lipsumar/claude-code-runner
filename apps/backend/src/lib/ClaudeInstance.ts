@@ -1,6 +1,6 @@
-import * as Docker from "dockerode";
-import axios from "axios";
-import { EventEmitter } from "events";
+import * as Docker from 'dockerode';
+import axios from 'axios';
+import { EventEmitter } from 'events';
 
 // Interface for constructor options
 interface ClaudeInstanceOptions {
@@ -22,7 +22,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
   private port: number;
   private apiKey: string;
   private isRunning: boolean = false;
-  private status: "starting" | "idle" | "executing" | "stopped" = "stopped";
+  private status: 'starting' | 'idle' | 'executing' | 'stopped' = 'stopped';
 
   /**
    * Creates a new Claude instance
@@ -49,12 +49,12 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
    */
   public async createContainer(): Promise<Docker.Container> {
     console.log(`Creating Claude executor container on port ${this.port}...`);
-    this.status = "starting";
+    this.status = 'starting';
     this.container = await this.docker.createContainer({
-      Image: "claude-executor-image",
-      ExposedPorts: { "3000/tcp": {} },
+      Image: 'claude-executor-image',
+      ExposedPorts: { '3000/tcp': {} },
       HostConfig: {
-        PortBindings: { "3000/tcp": [{ HostPort: this.port.toString() }] },
+        PortBindings: { '3000/tcp': [{ HostPort: this.port.toString() }] },
       },
       Env: [`ANTHROPIC_API_KEY=${this.apiKey}`],
       AttachStdout: true,
@@ -63,7 +63,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
 
     await this.container.start();
     this.isRunning = true;
-    this.status = "idle";
+    this.status = 'idle';
     console.log(`Claude executor running on http://localhost:${this.port}`);
 
     return this.container;
@@ -76,24 +76,24 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
    */
   public async executePrompt(prompt: string): Promise<void> {
     if (!this.isRunning) {
-      throw new Error("Container is not running. Call createContainer() first");
+      throw new Error('Container is not running. Call createContainer() first');
     }
-    this.status = "executing";
+    this.status = 'executing';
     try {
       const response = await axios({
-        method: "post",
+        method: 'post',
         url: `http://localhost:${this.port}/execute`,
         data: { prompt },
-        responseType: "stream",
+        responseType: 'stream',
       });
 
       // Handle streaming response and emit events
-      response.data.on("data", (chunk: Buffer) => {
+      response.data.on('data', (chunk: Buffer) => {
         const data = chunk.toString();
-        console.log("DATA:", data);
+        console.log('DATA:', data);
 
         // Emit the data event for subscribers
-        this.emit("data", data);
+        this.emit('data', data);
 
         // Optionally parse JSON if needed
         // try {
@@ -104,24 +104,24 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
         // }
       });
 
-      response.data.on("error", (error: Error) => {
-        console.error("Stream error:", error);
-        this.status = "idle";
-        this.emit("error", error);
+      response.data.on('error', (error: Error) => {
+        console.error('Stream error:', error);
+        this.status = 'idle';
+        this.emit('error', error);
       });
 
       return new Promise<void>((resolve) => {
-        response.data.on("end", () => {
-          this.status = "idle";
-          this.emit("end");
+        response.data.on('end', () => {
+          this.status = 'idle';
+          this.emit('end');
           resolve();
         });
       });
     } catch (error) {
       const err = error as Error;
-      console.error("Error executing prompt:", err);
-      this.emit("error", err);
-      this.status = "idle";
+      console.error('Error executing prompt:', err);
+      this.emit('error', err);
+      this.status = 'idle';
       throw err; // Re-throw to allow caller to handle
     }
   }
@@ -134,8 +134,8 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       await this.container.stop();
       await this.container.remove();
       this.isRunning = false;
-      this.status = "stopped";
-      console.log("Claude executor container stopped and removed");
+      this.status = 'stopped';
+      console.log('Claude executor container stopped and removed');
     }
   }
 

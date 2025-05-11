@@ -1,13 +1,8 @@
-import { publicProcedure, router } from "..";
-import ClaudeInstance from "../../lib/ClaudeInstance";
-import { docker } from "../../lib/docker";
-import {
-  addInstance,
-  getInstance,
-  listInstances,
-  removeInstance,
-} from "../../lib/instances";
-import { z } from "zod";
+import { publicProcedure, router } from '..';
+import ClaudeInstance from '../../lib/ClaudeInstance';
+import { docker } from '../../lib/docker';
+import { addInstance, getInstance, listInstances, removeInstance } from '../../lib/instances';
+import { z } from 'zod';
 
 export const instancesRouter = router({
   create: publicProcedure.mutation(async () => {
@@ -19,7 +14,7 @@ export const instancesRouter = router({
     const id = await addInstance(instance);
     return {
       id,
-      status: "created",
+      status: 'created',
     };
   }),
 
@@ -27,7 +22,7 @@ export const instancesRouter = router({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const instance = await getInstance(input.id);
@@ -41,13 +36,13 @@ export const instancesRouter = router({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const instance = await getInstance(input.id);
       instance.stopAndRemoveContainer();
       await removeInstance(input.id);
-      return { status: "removed" };
+      return { status: 'removed' };
     }),
 
   list: publicProcedure.query(async () => {

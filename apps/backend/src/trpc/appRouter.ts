@@ -1,6 +1,6 @@
-import { router } from ".";
+import { router } from '.';
 
-import { instancesRouter } from "./procedures/instances";
+import { instancesRouter } from './procedures/instances';
 
 export const appRouter = router({
   instances: instancesRouter,

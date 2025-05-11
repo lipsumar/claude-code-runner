@@ -1,6 +1,6 @@
-import { PrismaClient } from "../../generated/prisma";
-import ClaudeInstance from "./ClaudeInstance";
-import { docker } from "./docker";
+import { PrismaClient } from '../../generated/prisma';
+import ClaudeInstance from './ClaudeInstance';
+import { docker } from './docker';
 
 const prisma = new PrismaClient();
 const instances: Record<string, ClaudeInstance> = {};
@@ -34,7 +34,7 @@ export async function addInstance(instance: ClaudeInstance) {
   // Create a record in the database
   const dbInstance = await prisma.claudeInstance.create({
     data: {
-      name: "Unnamed Instance",
+      name: 'Unnamed Instance',
       port: port,
     },
   });
