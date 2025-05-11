@@ -1,8 +1,9 @@
 import { router } from ".";
-import { fooRouter } from "./procedures/foo";
+
+import { instancesRouter } from "./procedures/instances";
 
 export const appRouter = router({
-  foo: fooRouter,
+  instances: instancesRouter,
 });
 
 // Export type router type signature,
