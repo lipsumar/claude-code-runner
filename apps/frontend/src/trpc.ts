@@ -1,6 +1,6 @@
-import { createTRPCClient, httpBatchLink } from '@trpc/client'
-import type { AppRouter } from 'backend'
-import type { inferRouterInputs } from '@trpc/server'
+import { createTRPCClient, httpBatchLink } from '@trpc/client';
+import type { AppRouter } from 'backend';
+import type { inferRouterInputs } from '@trpc/server';
 
 export const trpc = createTRPCClient<AppRouter>({
   links: [
@@ -13,13 +13,13 @@ export const trpc = createTRPCClient<AppRouter>({
           //credentials: 'include',
         }).then((resp) => {
           if (!resp.ok) {
-            throw new Error(resp.statusText)
+            throw new Error(resp.statusText);
           }
-          return resp
-        })
+          return resp;
+        });
       },
     }),
   ],
-})
+});
 
-export type RouterInput = inferRouterInputs<AppRouter>
+export type RouterInput = inferRouterInputs<AppRouter>;

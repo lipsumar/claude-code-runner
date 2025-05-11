@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { trpc } from '@/trpc'
-import { ref } from 'vue'
-import ButtonPrimary from '@/components/ButtonPrimary.vue'
+import { trpc } from '@/trpc';
+import { ref } from 'vue';
+import ButtonPrimary from '@/components/ButtonPrimary.vue';
 
-type Instances = Awaited<ReturnType<typeof trpc.instances.list.query>>
-const instances = ref<Instances>([])
+type Instances = Awaited<ReturnType<typeof trpc.instances.list.query>>;
+const instances = ref<Instances>([]);
 
 function refreshInstances() {
   trpc.instances.list.query().then((data) => {
-    instances.value = data
-  })
+    instances.value = data;
+  });
 }
-refreshInstances()
+refreshInstances();
 
 function createInstance() {
   trpc.instances.create.mutate().then(() => {
-    refreshInstances()
-  })
+    refreshInstances();
+  });
 }
 
 function removeInstance(id: string) {
   trpc.instances.remove.mutate({ id }).then(() => {
-    refreshInstances()
-  })
+    refreshInstances();
+  });
 }
 </script>
 

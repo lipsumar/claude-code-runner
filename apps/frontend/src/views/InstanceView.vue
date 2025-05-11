@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { trpc } from '@/trpc'
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { trpc } from '@/trpc';
+import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
-const route = useRoute()
-const instanceId = route.params.id as string
+const route = useRoute();
+const instanceId = route.params.id as string;
 
-type Instance = Awaited<ReturnType<typeof trpc.instances.get.query>>
-const instance = ref<Instance | null>(null)
+type Instance = Awaited<ReturnType<typeof trpc.instances.get.query>>;
+const instance = ref<Instance | null>(null);
 
 function refreshInstance() {
   trpc.instances.get.query({ id: instanceId }).then((data) => {
-    instance.value = data
-  })
+    instance.value = data;
+  });
 }
-refreshInstance()
+refreshInstance();
 </script>
 
 <template>

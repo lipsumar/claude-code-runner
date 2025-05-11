@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink } from 'vue-router';
 
 withDefaults(
   defineProps<{
-    type?: 'button' | 'submit' | 'reset'
-    tag?: 'button' | 'a'
-    to?: string
+    type?: 'button' | 'submit' | 'reset';
+    tag?: 'button' | 'a';
+    to?: string;
   }>(),
   {
     type: 'button',
     tag: 'button',
   },
-)
-defineEmits(['click'])
+);
+defineEmits(['click']);
 </script>
 <template>
   <button
