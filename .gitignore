@@ -1,3 +1,4 @@
 node_modules
 dist
 notes.md
+apps/backend/src/mock-data/fake-task.ts
