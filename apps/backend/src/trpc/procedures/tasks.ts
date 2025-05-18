@@ -1,16 +1,77 @@
 import { publicProcedure, router } from '..';
 import { z } from 'zod';
-import { fakeTask } from '../../mock-data/fake-task';
+
+import { prisma } from '../../prisma';
 
 export const tasksRouter = router({
-  get: publicProcedure
+  byId: publicProcedure
     .input(
       z.object({
         id: z.string(),
       }),
     )
-    .query(async () => {
-      // let's just pretend for now
-      return fakeTask;
+    .query(async ({ input }) => {
+      return prisma.task.findUnique({
+        where: { id: input.id },
+      });
+    }),
+  create: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        steps: z.array(
+          z.object({
+            instructions: z.string(),
+            checks: z.string(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return prisma.task.create({
+        data: {
+          name: input.name,
+          steps: input.steps,
+        },
+      });
+    }),
+
+  update: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        steps: z.array(
+          z.object({
+            instructions: z.string(),
+            checks: z.string(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return prisma.task.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          steps: input.steps,
+        },
+      });
+    }),
+
+  list: publicProcedure.query(async () => {
+    return prisma.task.findMany();
+  }),
+
+  delete: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return prisma.task.delete({
+        where: { id: input.id },
+      });
     }),
 });

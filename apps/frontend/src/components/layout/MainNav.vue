@@ -13,7 +13,7 @@ const navigation = [
       <div class="flex h-16 items-center justify-between">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <BrandLogo class="h-8 w-8" />
+            <BrandLogo class="h-8 w-8 -mt-2" />
           </div>
           <div class="md:block">
             <div class="ml-10 flex items-baseline space-x-4">

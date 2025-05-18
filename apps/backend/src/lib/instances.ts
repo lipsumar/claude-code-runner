@@ -1,8 +1,7 @@
-import { PrismaClient } from '../../generated/prisma';
+import { prisma } from '../prisma';
 import ClaudeInstance from './ClaudeInstance';
 import { docker } from './docker';
 
-const prisma = new PrismaClient();
 const instances: Record<string, ClaudeInstance> = {};
 
 export async function getInstance(id: string) {

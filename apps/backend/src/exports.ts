@@ -6,3 +6,4 @@ export type {
   Message,
 } from '@anthropic-ai/sdk/resources/messages';
 export type { TaskMessages } from './mock-data/fake-task';
+export type { Task } from './types';

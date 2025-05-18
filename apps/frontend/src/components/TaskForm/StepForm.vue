@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import ChevronRightMini from '../icons/ChevronRightMini.vue';
-import ChevronDownMini from '../icons/ChevronDownMini.vue';
+
 import ChevronRightMicro from '../icons/ChevronRightMicro.vue';
 import ChevronDownMicro from '../icons/ChevronDownMicro.vue';
+import type { Task } from 'backend';
 
 defineProps({
   number: {
@@ -11,7 +11,7 @@ defineProps({
     required: true,
   },
 });
-
+const stepModel = defineModel<Task['steps'][0]>('step', { required: true });
 const instructionsOpen = ref(true);
 const checksOpen = ref(true);
 </script>
@@ -36,6 +36,7 @@ const checksOpen = ref(true);
             v-show="instructionsOpen"
             class="w-full h-32 pl-1 outline-none resize-y"
             placeholder="What should be done?"
+            v-model="stepModel.instructions"
           ></textarea>
         </div>
         <div class="border-t border-gray-300"></div>
@@ -49,6 +50,7 @@ const checksOpen = ref(true);
             v-show="checksOpen"
             class="w-full h-32 pl-1 outline-none resize-y"
             placeholder="What should be checked?"
+            v-model="stepModel.checks"
           ></textarea>
         </div>
       </div>

@@ -19,6 +19,7 @@ defineEmits(['click']);
     v-if="tag === 'button'"
     :type="type"
     class="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-700 rounded-md px-4 py-2 text-white text-sm font-semibold"
+    :class="$attrs.class"
     @click="$emit('click')"
   >
     <slot></slot>
@@ -27,6 +28,7 @@ defineEmits(['click']);
     v-if="tag === 'a' && to"
     :to="to"
     class="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-700 rounded-md px-4 py-2 text-white text-sm font-semibold"
+    :class="$attrs.class"
   >
     <slot></slot>
   </RouterLink>

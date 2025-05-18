@@ -25,13 +25,13 @@ const router = createRouter({
     },
     {
       path: '/tasks/new',
-      name: 'taskForm',
+      name: 'taskNew',
       component: TaskFormView,
     },
     {
-      path: '/tasks/:id',
-      name: 'task',
-      component: TaskView,
+      path: '/tasks/:id/edit',
+      name: 'taskEdit',
+      component: TaskFormView,
     },
   ],
 });
