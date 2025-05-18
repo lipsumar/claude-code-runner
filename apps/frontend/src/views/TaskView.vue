@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageLayout from '@/components/layout/PageLayout.vue';
 import StepEntries from '@/components/StepEntries.vue';
 import TaskMessages from '@/components/TaskMessages.vue';
 import { messageToStepEntries, type StepEntry } from '@/lib/messagesToStepEntries';
@@ -24,7 +25,10 @@ refreshTask();
 </script>
 
 <template>
-  <div v-if="task" class="w-4xl mx-auto">
-    <StepEntries :stepEntries="stepEntries" />
-  </div>
+  <PageLayout title="Tasks"
+    >kjh
+    <div v-if="task" class="w-4xl mx-auto">
+      <StepEntries :stepEntries="stepEntries" />
+    </div>
+  </PageLayout>
 </template>
