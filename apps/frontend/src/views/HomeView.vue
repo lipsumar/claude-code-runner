@@ -30,7 +30,6 @@ function removeInstance(id: string) {
 
 <template>
   <PageLayout title="Home">
-    <TaskForm />
     <h1>Instances</h1>
     <ul>
       <li v-for="instance in instances" :key="instance.id">
