@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import app from './app';
 
 if (!process.env.ANTHROPIC_API_KEY) {

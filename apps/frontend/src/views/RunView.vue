@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import PageLayout from '@/components/layout/PageLayout.vue';
 import StepEntries from '@/components/StepEntries.vue';
-import TaskMessages from '@/components/TaskMessages.vue';
 import { messageToStepEntries, type StepEntry } from '@/lib/messagesToStepEntries';
 import { trpc } from '@/trpc';
 import type { TaskMessages as TaskMessagesType } from 'backend';
@@ -9,15 +8,15 @@ import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const instanceId = route.params.id as string;
+const runId = route.params.id as string;
 
-type Task = Awaited<ReturnType<typeof trpc.tasks.get.query>>;
-const task = ref<Task | null>(null);
+type TaskRun = Awaited<ReturnType<typeof trpc.runs.byId.query>>;
+const taskRun = ref<TaskRun | null>(null);
 const stepEntries = ref<StepEntry[]>([]);
 
 function refreshTask() {
-  trpc.tasks.get.query({ id: instanceId }).then((data) => {
-    task.value = data;
+  trpc.runs.byId.query({ id: runId }).then((data) => {
+    taskRun.value = data;
     stepEntries.value = messageToStepEntries(data.messages as TaskMessagesType);
   });
 }
@@ -25,9 +24,8 @@ refreshTask();
 </script>
 
 <template>
-  <PageLayout title="Tasks"
-    >kjh
-    <div v-if="task" class="w-4xl mx-auto">
+  <PageLayout title="Run">
+    <div v-if="taskRun" class="w-4xl mx-auto">
       <StepEntries :stepEntries="stepEntries" />
     </div>
   </PageLayout>

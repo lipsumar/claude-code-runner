@@ -16,18 +16,24 @@ export async function getInstance(id: string) {
       throw new Error(`Instance with id ${id} does not exist`);
     }
 
-    // If it exists in DB but not in memory, recreate it using the port
-    instances[id] = new ClaudeInstance({
-      port: dbInstance.port,
-      docker: docker,
-      apiKey: process.env.ANTHROPIC_API_KEY as string,
-    });
+    // // If it exists in DB but not in memory, recreate it using the port
+    // instances[id] = new ClaudeInstance({
+    //   port: dbInstance.port,
+    //   docker: docker,
+    //   apiKey: process.env.ANTHROPIC_API_KEY as string,
+    // });
   }
 
   return instances[id];
 }
 
-export async function addInstance(instance: ClaudeInstance) {
+export async function createInstance(taskRunId: string) {
+  const instance = new ClaudeInstance({
+    apiKey: process.env.ANTHROPIC_API_KEY as string,
+    docker,
+  });
+  await instance.startContainer();
+
   const port = instance.getPort();
 
   // Create a record in the database
@@ -35,14 +41,13 @@ export async function addInstance(instance: ClaudeInstance) {
     data: {
       name: 'Unnamed Instance',
       port: port,
+      taskRunId,
     },
   });
 
   // Store in memory with the generated ID
   instances[dbInstance.id] = instance;
-
-  // Return the ID so it can be used to reference this instance
-  return dbInstance.id;
+  return instance;
 }
 
 export async function removeInstance(id: string) {

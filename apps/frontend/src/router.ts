@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import InstanceView from '@/views/InstanceView.vue';
-import TaskView from './views/TaskView.vue';
+import RunView from './views/RunView.vue';
 import TaskListView from './views/TaskListView.vue';
 import TaskFormView from './views/TaskFormView.vue';
+import TaskRunView from './views/TaskRunView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,16 @@ const router = createRouter({
       path: '/tasks/:id/edit',
       name: 'taskEdit',
       component: TaskFormView,
+    },
+    {
+      path: '/tasks/:id/run',
+      name: 'taskRun',
+      component: TaskRunView,
+    },
+    {
+      path: '/runs/:id',
+      name: 'runView',
+      component: RunView,
     },
   ],
 });

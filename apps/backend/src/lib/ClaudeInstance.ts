@@ -47,7 +47,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
    * Creates and starts the Claude executor container
    * @returns The container instance
    */
-  public async createContainer(): Promise<Docker.Container> {
+  public async startContainer(): Promise<Docker.Container> {
     console.log(`Creating Claude executor container on port ${this.port}...`);
     this.status = 'starting';
     this.container = await this.docker.createContainer({
@@ -78,6 +78,9 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
     if (!this.isRunning) {
       throw new Error('Container is not running. Call createContainer() first');
     }
+
+    await this.waitForReady();
+
     this.status = 'executing';
     try {
       const response = await axios({
@@ -90,18 +93,15 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       // Handle streaming response and emit events
       response.data.on('data', (chunk: Buffer) => {
         const data = chunk.toString();
-        console.log('DATA:', data);
 
-        // Emit the data event for subscribers
-        this.emit('data', data);
-
-        // Optionally parse JSON if needed
-        // try {
-        //   const jsonChunk = JSON.parse(data);
-        //   this.emit('json-data', jsonChunk);
-        // } catch (e) {
-        //   // Not valid JSON, already emitted as raw data
-        // }
+        try {
+          const jsonChunk = JSON.parse(data);
+          console.log('DATA:', data);
+          this.emit('data', jsonChunk);
+        } catch {
+          console.log('ERROR:', data);
+          this.emit('error', new Error('Failed to parse JSON chunk: ' + data));
+        }
       });
 
       response.data.on('error', (error: Error) => {
@@ -137,6 +137,34 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       this.status = 'stopped';
       console.log('Claude executor container stopped and removed');
     }
+  }
+
+  /**
+   * Ensures the container is ready to accept requests
+   */
+  private async isReady(): Promise<boolean> {
+    if (!this.container) {
+      throw new Error('Container is not created. Call createContainer() first');
+    }
+
+    try {
+      await axios.get(`http://localhost:${this.port}/health`);
+      return true;
+    } catch (error) {
+      console.error('Not ready:', (error as Error).message);
+      return false;
+    }
+  }
+
+  /**
+   * Waits until the container is ready to accept requests
+   */
+  private async waitForReady(): Promise<void> {
+    while (!(await this.isReady())) {
+      console.log('Waiting for container to be ready...');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    console.log('Container is ready');
   }
 
   /**

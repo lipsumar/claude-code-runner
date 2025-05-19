@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ButtonPrimary from '@/components/buttons/ButtonPrimary.vue';
 import CreateButton from '@/components/buttons/CreateButton.vue';
 import PageLayout from '@/components/layout/PageLayout.vue';
 import { trpc } from '@/trpc';
@@ -33,15 +34,24 @@ refreshTasks();
             {{ task.createdAt }}
           </td>
           <td class="p-2 border-b border-gray-300 group-hover:bg-neutral-50 text-right pt-4">
-            <RouterLink :to="{ name: 'taskEdit', params: { id: task.id } }" class="inline-block">
-              <PencilIcon class="h-5 w-5 text-gray-500 hover:text-gray-700" />
-            </RouterLink>
-            <span class="inline-block">
-              <TrashIcon
-                class="h-5 w-5 text-gray-500 hover:text-gray-700 cursor-pointer ml-2"
-                @click="trpc.tasks.delete.mutate({ id: task.id }).then(refreshTasks)"
-              />
-            </span>
+            <div class="flex items-center">
+              <ButtonPrimary
+                :to="{ name: 'taskRun', params: { id: task.id } }"
+                tag="a"
+                size="small"
+                class="inline-block mr-2"
+                >Run</ButtonPrimary
+              >
+              <RouterLink :to="{ name: 'taskEdit', params: { id: task.id } }" class="inline-block">
+                <PencilIcon class="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              </RouterLink>
+              <span class="inline-block">
+                <TrashIcon
+                  class="h-5 w-5 text-gray-500 hover:text-gray-700 cursor-pointer ml-2"
+                  @click="trpc.tasks.delete.mutate({ id: task.id }).then(refreshTasks)"
+                />
+              </span>
+            </div>
           </td>
         </tr>
       </tbody>

@@ -1,23 +1,9 @@
 import { publicProcedure, router } from '..';
-import ClaudeInstance from '../../lib/ClaudeInstance';
-import { docker } from '../../lib/docker';
-import { addInstance, getInstance, listInstances, removeInstance } from '../../lib/instances';
+
+import { getInstance, listInstances, removeInstance } from '../../lib/instances-pool';
 import { z } from 'zod';
 
 export const instancesRouter = router({
-  create: publicProcedure.mutation(async () => {
-    const instance = new ClaudeInstance({
-      apiKey: process.env.ANTHROPIC_API_KEY as string,
-      docker,
-    });
-    await instance.createContainer();
-    const id = await addInstance(instance);
-    return {
-      id,
-      status: 'created',
-    };
-  }),
-
   get: publicProcedure
     .input(
       z.object({
