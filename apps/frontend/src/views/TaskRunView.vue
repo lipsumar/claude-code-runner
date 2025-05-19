@@ -5,13 +5,16 @@ import FormInput from '@/components/form/FormInput.vue';
 import PageLayout from '@/components/layout/PageLayout.vue';
 import router from '@/router';
 import { trpc } from '@/trpc';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const taskId = route.params.id as string;
 
+const repository = ref('');
+
 function runTask() {
-  trpc.runs.create.mutate({ taskId }).then((data) => {
+  trpc.runs.create.mutate({ taskId, repository: repository.value }).then((data) => {
     console.log(data);
     router.push({
       name: 'runView',
@@ -24,7 +27,7 @@ function runTask() {
   <PageLayout title="Run task">
     <form @submit.prevent="runTask">
       <FormField label="Repository">
-        <FormInput />
+        <FormInput v-model="repository" />
       </FormField>
 
       <ButtonPrimary type="submit" class="mt-4">Run</ButtonPrimary>

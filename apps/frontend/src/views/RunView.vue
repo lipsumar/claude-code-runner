@@ -3,7 +3,7 @@ import PageLayout from '@/components/layout/PageLayout.vue';
 import StepEntries from '@/components/StepEntries.vue';
 import { messageToStepEntries, type StepEntry } from '@/lib/messagesToStepEntries';
 import { trpc } from '@/trpc';
-import type { TaskMessages as TaskMessagesType } from 'backend';
+import type { WrappedMessage } from 'backend';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -17,7 +17,7 @@ const stepEntries = ref<StepEntry[]>([]);
 function refreshTask() {
   trpc.runs.byId.query({ id: runId }).then((data) => {
     taskRun.value = data;
-    stepEntries.value = messageToStepEntries(data.messages as TaskMessagesType);
+    stepEntries.value = messageToStepEntries(data.messages as WrappedMessage[]);
   });
 }
 refreshTask();

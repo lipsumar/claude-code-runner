@@ -46,9 +46,10 @@ model TaskRun {
   taskId String
   task   Task   @relation(fields: [taskId], references: [id])
 
-  name     String
+  name       String
+  repository String
   /// [TaskSteps]
-  steps    Json
-  messages Json
-  instance ClaudeInstance?
+  steps      Json
+  messages   Json
+  instance   ClaudeInstance?
 }

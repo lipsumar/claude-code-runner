@@ -1,4 +1,4 @@
-import type { ContentBlock, ContentBlockParam, TaskMessages } from 'backend';
+import type { ContentBlock, ContentBlockParam, TaskMessages, WrappedMessage } from 'backend';
 import { isBashInput, isReadInput, isTodoInput, type BashInput } from './toolInputValidation';
 import type { ClaudeCodeTodo } from './types';
 import { todoStatusDiff, type TodoDiff } from './todoDiff';
@@ -35,8 +35,9 @@ export type StepEntry =
   | BashStepEntry
   | ReadStepEntry;
 
-export function messageToStepEntries(messages: TaskMessages): StepEntry[] {
+export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEntry[] {
   const entries: StepEntry[] = [];
+  const messages = wrappedMessages.map((m) => m.message);
   const blocks = messagesToBlocks(messages);
   let todoList: ClaudeCodeTodo[] = [];
   const toolNameById: Record<string, string> = {};

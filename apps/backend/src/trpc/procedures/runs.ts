@@ -8,6 +8,7 @@ export const runsRouter = router({
     .input(
       z.object({
         taskId: z.string(),
+        repository: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -25,6 +26,7 @@ export const runsRouter = router({
           name: task.name,
           steps: task.steps,
           messages: [],
+          repository: input.repository,
         },
       });
       console.log('TaskRun created:', taskRun);
@@ -33,8 +35,12 @@ export const runsRouter = router({
 
       const prompt = taskRun.steps[0].instructions; //starting simple
       const messages: unknown[] = [];
-      instance.on('data', (data: unknown) => {
-        console.log('Received data:', data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      instance.on('data', (data: any) => {
+        if (!('message' in data)) {
+          console.log('No message in data, ignoring ->', data);
+          return;
+        }
         messages.push(data);
         prisma.taskRun
           .update({
@@ -50,19 +56,33 @@ export const runsRouter = router({
             console.error('Error updating messages in database:', error);
           });
       });
-      console.log('Prompt:', prompt);
-      console.log('Executing prompt...');
+
+      console.log('Cloning repository:', input.repository);
       instance
-        .executePrompt(prompt)
-        .then(() => instance.stopAndRemoveContainer()) // for now, stop immediately
-        .catch((error) => {
-          console.error('Error executing prompt:', error);
-          throw new Error('Failed to execute prompt');
+        .initGitConfig({
+          email: process.env.GITHUB_USER_EMAIL as string,
+          githubUsername: process.env.GITHUB_USER_USERNAME as string,
+          sshPrivateKey: process.env.GITHUB_USER_PRIVATE_KEY as string,
+          sshPublicKey: process.env.GITHUB_USER_PUBLIC_KEY as string,
         })
-        .catch((error) => {
-          console.error('Error stopping container:', error);
-          throw new Error('Failed to stop container');
+        .then(() => {
+          instance.cloneRepository(input.repository).then(() => {
+            console.log('Prompt:', prompt);
+            console.log('Executing prompt...');
+            instance
+              .executePrompt(prompt)
+              //.then(() => instance.stopAndRemoveContainer()) // for now, stop immediately
+              .catch((error) => {
+                console.error('Error executing prompt:', error);
+                throw new Error('Failed to execute prompt');
+              })
+              .catch((error) => {
+                console.error('Error stopping container:', error);
+                throw new Error('Failed to stop container');
+              });
+          });
         });
+
       return {
         id: taskRun.id,
       };

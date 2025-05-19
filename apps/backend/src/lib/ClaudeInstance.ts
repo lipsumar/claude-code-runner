@@ -56,7 +56,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       HostConfig: {
         PortBindings: { '3000/tcp': [{ HostPort: this.port.toString() }] },
       },
-      Env: [`ANTHROPIC_API_KEY=${this.apiKey}`],
+      Env: [`ANTHROPIC_API_KEY=${this.apiKey}`, `GITHUB_TOKEN=${process.env.GITHUB_API_TOKEN}`],
       AttachStdout: true,
       AttachStderr: true,
     });
@@ -67,6 +67,78 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
     console.log(`Claude executor running on http://localhost:${this.port}`);
 
     return this.container;
+  }
+
+  /**
+   * Initializes the Git configuration in the container
+   */
+  public async initGitConfig({
+    githubUsername,
+    email,
+    sshPrivateKey,
+    sshPublicKey,
+  }: {
+    githubUsername: string;
+    email: string;
+    sshPrivateKey: string;
+    sshPublicKey: string;
+  }): Promise<void> {
+    if (!this.container) {
+      throw new Error('Container is not created. Call createContainer() first');
+    }
+
+    if (!this.isRunning) {
+      throw new Error('Container is not running. Call createContainer() first');
+    }
+
+    await this.waitForReady();
+
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `http://localhost:${this.port}/init-git`,
+        data: {
+          githubUsername,
+          email,
+          sshPrivateKey,
+          sshPublicKey,
+        },
+      });
+
+      console.log('Git config response:', response.data);
+    } catch (error) {
+      console.error('Error initializing Git config:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clones the repository into the container
+   * @param repository The GitHub repository full name (e.g., 'user/repo')
+   */
+  public async cloneRepository(repository: string): Promise<void> {
+    if (!this.container) {
+      throw new Error('Container is not created. Call createContainer() first');
+    }
+
+    if (!this.isRunning) {
+      throw new Error('Container is not running. Call createContainer() first');
+    }
+
+    await this.waitForReady();
+
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `http://localhost:${this.port}/git-clone`,
+        data: { repositoryUrl: `git@github.com:${repository}.git` },
+      });
+
+      console.log('Clone response:', response.data);
+    } catch (error) {
+      console.error('Error cloning repository:', error);
+      throw error;
+    }
   }
 
   /**
@@ -92,15 +164,18 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
 
       // Handle streaming response and emit events
       response.data.on('data', (chunk: Buffer) => {
-        const data = chunk.toString();
+        const rawStr = chunk.toString();
 
         try {
-          const jsonChunk = JSON.parse(data);
-          console.log('DATA:', data);
-          this.emit('data', jsonChunk);
+          const lines = rawStr.split('\n').filter((line) => line.trim() !== '');
+          for (const line of lines) {
+            const jsonChunk = JSON.parse(line);
+            console.log('DATA:', jsonChunk);
+            this.emit('data', jsonChunk);
+          }
         } catch {
-          console.log('ERROR:', data);
-          this.emit('error', new Error('Failed to parse JSON chunk: ' + data));
+          console.log('ERROR:', rawStr);
+          this.emit('error', new Error('Failed to parse JSON chunk: ' + rawStr));
         }
       });
 
@@ -159,7 +234,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
   /**
    * Waits until the container is ready to accept requests
    */
-  private async waitForReady(): Promise<void> {
+  public async waitForReady(): Promise<void> {
     while (!(await this.isReady())) {
       console.log('Waiting for container to be ready...');
       await new Promise((resolve) => setTimeout(resolve, 1000));
