@@ -1,7 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
 
-// Import routes
 import gitRoutes from "./routes/git";
 import executeRoutes from "./routes/execute";
 import healthRoutes from "./routes/health";

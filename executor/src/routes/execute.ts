@@ -2,6 +2,7 @@ import { Router } from "express";
 import { execa } from "execa";
 import { writeFile } from "fs/promises";
 import { PassThrough } from "stream";
+import readline from "readline";
 
 const router = Router();
 
@@ -31,12 +32,19 @@ router.post("/execute", async (req, res) => {
     const subprocess = execa("/executor-server/start-claude.sh", {
       stdout: "pipe",
       stderr: "pipe",
+      cwd: "/workspace",
+    });
+
+    // Use a line-by-line stream parser
+    const rl = readline.createInterface({
+      input: subprocess.stdout,
+      crlfDelay: Infinity,
     });
 
     // Stream stdout to client
-    subprocess.stdout.on("data", (data) => {
-      console.log(`stdout: ${data.toString()}`);
-      outputStream.write(data);
+    rl.on("line", (line) => {
+      console.log(`stdout: ${line}`);
+      outputStream.write(line);
     });
 
     // Log stderr but don't send to client (optional)

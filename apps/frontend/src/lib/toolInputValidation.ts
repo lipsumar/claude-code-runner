@@ -36,7 +36,7 @@ export function isTodoInput(value: unknown): value is TodoInput {
 
 export type BashInput = {
   command: string;
-  description: string;
+  description?: string;
 };
 export function isBashInput(value: unknown): value is BashInput {
   if (!value || typeof value !== 'object') {
@@ -45,7 +45,7 @@ export function isBashInput(value: unknown): value is BashInput {
 
   const obj = value as Record<string, unknown>;
 
-  return isString(obj.command) && isString(obj.description);
+  return isString(obj.command) && (obj.description === undefined || isString(obj.description));
 }
 
 export type ReadInput = {

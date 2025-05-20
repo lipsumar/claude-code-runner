@@ -122,7 +122,7 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
         entries.push({
           type: 'bash',
           command: runningBashCommand.bashInput.command,
-          description: runningBashCommand.bashInput.description,
+          description: runningBashCommand.bashInput.description || '',
           output: block.content,
           isError: block.is_error ?? false,
         });
