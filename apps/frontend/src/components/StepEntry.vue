@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { StepEntry } from '@/lib/messagesToStepEntries';
+import ReadOrWriteEntry from './stepEntries/ReadOrWriteEntry.vue';
 
 defineProps({
   stepEntry: {
@@ -38,14 +39,8 @@ const emojiByStatus = {
     </div>
   </div>
 
-  <div v-if="stepEntry.type === 'read'">
-    📄 <span class="font-mono">{{ stepEntry.filePath }}</span>
-    <div
-      class="bg-neutral-700 text-white text-sm font-mono py-2 shadow rounded-md whitespace-pre-wrap"
-    >
-      {{ stepEntry.content }}
-    </div>
-  </div>
+  <ReadOrWriteEntry v-if="stepEntry.type === 'read'" :entry="stepEntry" type="read" />
+  <ReadOrWriteEntry v-if="stepEntry.type === 'write'" :entry="stepEntry" type="write" />
 
   <div v-if="stepEntry.type === 'todoCreate'">
     <ul>

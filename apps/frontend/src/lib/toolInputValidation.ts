@@ -60,3 +60,17 @@ export function isReadInput(value: unknown): value is ReadInput {
 
   return isString(obj.file_path);
 }
+
+export type WriteInput = {
+  file_path: string;
+  content: string;
+};
+export function isWriteInput(value: unknown): value is WriteInput {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return isString(obj.file_path) && isString(obj.content);
+}

@@ -1,5 +1,11 @@
 import type { ContentBlock, ContentBlockParam, TaskMessages, WrappedMessage } from 'backend';
-import { isBashInput, isReadInput, isTodoInput, type BashInput } from './toolInputValidation';
+import {
+  isBashInput,
+  isReadInput,
+  isTodoInput,
+  isWriteInput,
+  type BashInput,
+} from './toolInputValidation';
 import type { ClaudeCodeTodo } from './types';
 import { todoStatusDiff, type TodoDiff } from './todoDiff';
 
@@ -22,8 +28,13 @@ type BashStepEntry = {
   output: string;
   isError: boolean;
 };
-type ReadStepEntry = {
+export type ReadStepEntry = {
   type: 'read';
+  filePath: string;
+  content: string;
+};
+export type WriteStepEntry = {
+  type: 'write';
   filePath: string;
   content: string;
 };
@@ -33,7 +44,8 @@ export type StepEntry =
   | TodoCreateStepEntry
   | TodoUpdateStepEntry
   | BashStepEntry
-  | ReadStepEntry;
+  | ReadStepEntry
+  | WriteStepEntry;
 
 export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEntry[] {
   const entries: StepEntry[] = [];
@@ -105,6 +117,18 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
           filePath: block.input.file_path,
         },
       };
+      continue;
+    }
+
+    if (block.type === 'tool_use' && block.name === 'Write') {
+      if (!isWriteInput(block.input)) {
+        throw new Error('tool_use: Write: unexpected input');
+      }
+      entries.push({
+        type: 'write',
+        filePath: block.input.file_path,
+        content: block.input.content,
+      });
       continue;
     }
 
