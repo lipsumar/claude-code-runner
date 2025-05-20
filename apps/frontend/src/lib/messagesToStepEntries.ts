@@ -1,4 +1,10 @@
-import type { ContentBlock, ContentBlockParam, TaskMessages, WrappedMessage } from 'backend';
+import type {
+  ContentBlock,
+  ContentBlockParam,
+  InternalContentBlock,
+  TaskMessages,
+  WrappedMessage,
+} from 'backend';
 import {
   isBashInput,
   isReadInput,
@@ -9,6 +15,10 @@ import {
 import type { ClaudeCodeTodo } from './types';
 import { todoStatusDiff, type TodoDiff } from './todoDiff';
 
+type InternalUpdateEntry = {
+  type: 'internal-update';
+  content: string;
+};
 type TextStepEntry = {
   type: 'text';
   text: string;
@@ -45,7 +55,8 @@ export type StepEntry =
   | TodoUpdateStepEntry
   | BashStepEntry
   | ReadStepEntry
-  | WriteStepEntry;
+  | WriteStepEntry
+  | InternalUpdateEntry;
 
 export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEntry[] {
   const entries: StepEntry[] = [];
@@ -65,6 +76,18 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
   } | null = null;
 
   for (const block of blocks) {
+    if ('internal' in block) {
+      if (block.type === 'update') {
+        entries.push({
+          type: 'internal-update',
+          content: block.data,
+        });
+      } else {
+        console.warn('unknown internal message type', block);
+      }
+      continue;
+    }
+
     if (block.type === 'text') {
       entries.push(block);
     }
@@ -174,18 +197,23 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
 
 function messagesToBlocks(messages: TaskMessages) {
   const nonSystemMessages = messages.filter((m) => m.role !== 'system');
-  const blocks: (ContentBlock | ContentBlockParam)[] = nonSystemMessages.flatMap((m) => {
-    if (typeof m.content === 'string') {
-      return [{ type: 'text', text: m.content, citations: null }];
-    }
+  const blocks: (ContentBlock | ContentBlockParam | InternalContentBlock)[] =
+    nonSystemMessages.flatMap((m) => {
+      if (typeof m.content === 'string') {
+        return [{ type: 'text', text: m.content, citations: null }];
+      }
 
-    // Transform ContentBlockParam to ContentBlock if needed
-    if (Array.isArray(m.content)) {
-      return m.content.map((block) => transformToContentBlock(block));
-    }
+      if (m.role === 'internal') {
+        return m.content as any; // TODO: fix this type. It's late and typescript is mean
+      }
 
-    return m.content;
-  });
+      // Transform ContentBlockParam to ContentBlock if needed
+      if (Array.isArray(m.content)) {
+        return m.content.map((block) => transformToContentBlock(block));
+      }
+
+      return m.content;
+    });
   return blocks;
 }
 

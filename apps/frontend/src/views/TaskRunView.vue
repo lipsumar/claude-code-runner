@@ -11,7 +11,7 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 const taskId = route.params.id as string;
 
-const repository = ref('');
+const repository = ref('lipsumar/claude-code-runner');
 
 function runTask() {
   trpc.runs.create.mutate({ taskId, repository: repository.value }).then((data) => {

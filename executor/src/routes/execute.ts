@@ -28,6 +28,45 @@ router.post("/execute", async (req, res) => {
     // Pipe the stream to the response
     outputStream.pipe(res);
 
+    if (prompt === "mock") {
+      let count = 0;
+      function sendMockMessage() {
+        count++;
+        const mockMessage = JSON.stringify({
+          type: "assistant",
+          message: {
+            id: "msg_0141YRdx8NEHpfBu36FVhkeS",
+            type: "message",
+            role: "assistant",
+            model: "claude-3-7-sonnet-20250219",
+            content: [
+              {
+                type: "text",
+                text: `This is a mock response from Claude. (${count})`,
+              },
+            ],
+            stop_reason: "end_turn",
+            stop_sequence: null,
+            usage: {
+              input_tokens: 4,
+              cache_creation_input_tokens: 0,
+              cache_read_input_tokens: 24543,
+              output_tokens: 23,
+            },
+          },
+          session_id: "53c78480-8d5a-4a58-8b4f-e797450f7011",
+        });
+        outputStream.write(mockMessage);
+        if (count < 10) {
+          setTimeout(sendMockMessage, 1000); // Send mock message every second
+        } else {
+          outputStream.end(); // End the stream after 10 messages
+        }
+      }
+      sendMockMessage();
+      return;
+    }
+
     console.log(`Executing claude with prompt from /tmp/prompt.txt`);
     const subprocess = execa("/executor-server/start-claude.sh", {
       stdout: "pipe",

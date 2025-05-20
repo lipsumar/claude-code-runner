@@ -1,7 +1,8 @@
 import { publicProcedure, router } from '..';
-import { createInstance } from '../../lib/instances-pool';
+import { createInstance, getInstance } from '../../lib/instances-pool';
 import { z } from 'zod';
 import { prisma } from '../../prisma';
+import { on } from 'events';
 
 export const runsRouter = router({
   create: publicProcedure
@@ -96,5 +97,33 @@ export const runsRouter = router({
       throw new Error('TaskRun not found');
     }
     return taskRun;
+  }),
+
+  onMessage: publicProcedure.input(z.object({ id: z.string() })).subscription(async function* ({
+    input,
+    signal,
+  }) {
+    // find instance for this taskRun
+    const dbInstance = await prisma.claudeInstance.findUniqueOrThrow({
+      where: { taskRunId: input.id },
+    });
+
+    const instance = await getInstance(dbInstance.id);
+    if (!instance) {
+      throw new Error('Instance not found');
+    }
+
+    const dataIterator = on(instance, 'data', {
+      // Passing the AbortSignal from the request automatically cancels the event emitter when the request is aborted
+      signal,
+    });
+
+    for await (const [data] of dataIterator) {
+      if (!('message' in data)) {
+        continue;
+      }
+      //console.log('Yielding data:', data);
+      yield data;
+    }
   }),
 });

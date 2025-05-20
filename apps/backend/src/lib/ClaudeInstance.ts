@@ -1,6 +1,7 @@
 import * as Docker from 'dockerode';
 import axios from 'axios';
 import { EventEmitter } from 'events';
+import { WrappedMessage } from '../mock-data/fake-task';
 
 // Interface for constructor options
 interface ClaudeInstanceOptions {
@@ -11,7 +12,7 @@ interface ClaudeInstanceOptions {
 
 // Define event types for TypeScript
 interface ClaudeInstanceEvents {
-  data: [data: string];
+  data: [data: WrappedMessage];
   end: [];
   error: [error: Error];
 }
@@ -91,6 +92,8 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       throw new Error('Container is not running. Call createContainer() first');
     }
 
+    this.emit('data', internalMessage('update', 'Initializing Git config...'));
+
     await this.waitForReady();
 
     try {
@@ -125,6 +128,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       throw new Error('Container is not running. Call createContainer() first');
     }
 
+    this.emit('data', internalMessage('update', 'Cloning repository...'));
     await this.waitForReady();
 
     try {
@@ -151,6 +155,7 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
       throw new Error('Container is not running. Call createContainer() first');
     }
 
+    this.emit('data', internalMessage('update', 'Executing prompt...'));
     await this.waitForReady();
 
     this.status = 'executing';
@@ -262,6 +267,18 @@ export class ClaudeInstance extends EventEmitter<ClaudeInstanceEvents> {
   public isContainerRunning(): boolean {
     return this.isRunning;
   }
+}
+
+function internalMessage(type: string, data: string) {
+  const msg: WrappedMessage = {
+    type: 'internal',
+    session_id: '',
+    message: {
+      role: 'internal',
+      content: [{ internal: true, type, data }],
+    },
+  };
+  return msg;
 }
 
 export default ClaudeInstance;

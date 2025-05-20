@@ -17,6 +17,10 @@ const emojiByStatus = {
 </script>
 
 <template>
+  <div v-if="stepEntry.type === 'internal-update'" class="opacity-60 text-center">
+    {{ stepEntry.content }}
+  </div>
+
   <div
     v-if="stepEntry.type === 'text'"
     class="bg-sky-200 py-2 px-3 rounded-lg inline-block whitespace-pre-line"

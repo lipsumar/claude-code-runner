@@ -5,5 +5,5 @@ export type {
   ContentBlockParam,
   Message,
 } from '@anthropic-ai/sdk/resources/messages';
-export type { TaskMessages, WrappedMessage } from './mock-data/fake-task';
+export type { TaskMessages, WrappedMessage, InternalContentBlock } from './mock-data/fake-task';
 export type { Task } from './types';
