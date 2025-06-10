@@ -1,7 +1,7 @@
 import * as Docker from 'dockerode';
 import axios from 'axios';
 import { EventEmitter } from 'events';
-import { WrappedMessage } from '../mock-data/fake-task';
+import { WrappedMessage } from '../types';
 
 // Interface for constructor options
 interface ClaudeInstanceOptions {
