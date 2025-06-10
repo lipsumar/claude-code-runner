@@ -88,5 +88,8 @@ COPY --chown=node:node . .
 RUN chmod +x ./start-claude.sh
 RUN yarn build
 
+# Install nvm
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
 EXPOSE 3000
 CMD ["yarn", "start"]
