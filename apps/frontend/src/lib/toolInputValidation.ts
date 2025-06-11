@@ -89,3 +89,17 @@ export function isEditInput(value: unknown): value is EditInput {
 
   return isString(obj.file_path) && isString(obj.old_string) && isString(obj.new_string);
 }
+
+export type GrepInput = {
+  path: string;
+  pattern: string;
+};
+export function isGrepInput(value: unknown): value is GrepInput {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return isString(obj.path) && isString(obj.pattern);
+}

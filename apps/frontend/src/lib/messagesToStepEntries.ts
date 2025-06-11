@@ -8,6 +8,7 @@ import type {
 import {
   isBashInput,
   isEditInput,
+  isGrepInput,
   isReadInput,
   isTodoInput,
   isWriteInput,
@@ -55,6 +56,12 @@ export type EditStepEntry = {
   oldString: string;
   newString: string;
 };
+export type GrepStepEntry = {
+  type: 'grep';
+  path: string;
+  pattern: string;
+  content: string;
+};
 
 export type StepEntry =
   | TextStepEntry
@@ -64,6 +71,7 @@ export type StepEntry =
   | ReadStepEntry
   | WriteStepEntry
   | EditStepEntry
+  | GrepStepEntry
   | InternalUpdateEntry;
 
 export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEntry[] {
@@ -80,6 +88,13 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
     toolUseId: string;
     readInput: {
       filePath: string;
+    };
+  } | null = null;
+  let runningGrepCommand: {
+    toolUseId: string;
+    grepInput: {
+      path: string;
+      pattern: string;
     };
   } | null = null;
 
@@ -176,6 +191,20 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
       continue;
     }
 
+    if (block.type === 'tool_use' && block.name === 'Grep') {
+      if (!isGrepInput(block.input)) {
+        throw new Error('tool_use: Grep: unexpected input');
+      }
+      runningGrepCommand = {
+        toolUseId: block.id,
+        grepInput: {
+          path: block.input.path,
+          pattern: block.input.pattern,
+        },
+      };
+      continue;
+    }
+
     if (block.type === 'tool_result') {
       const toolName = toolNameById[block.tool_use_id];
       if (toolName === 'TodoWrite') {
@@ -206,11 +235,25 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
           filePath: runningReadCommand.readInput.filePath,
           content: block.content,
         });
+      } else if (toolName === 'Grep') {
+        if (!runningGrepCommand) {
+          throw new Error('tool_result: Grep: no running command');
+        }
+        if (typeof block.content !== 'string') {
+          throw new Error('tool_result: Grep: unexpected content (not string)');
+        }
+        entries.push({
+          type: 'grep',
+          path: runningGrepCommand.grepInput.path,
+          pattern: runningGrepCommand.grepInput.pattern,
+          content: block.content,
+        });
       }
     }
 
     runningBashCommand = null;
     runningReadCommand = null;
+    runningGrepCommand = null;
   }
 
   return entries;

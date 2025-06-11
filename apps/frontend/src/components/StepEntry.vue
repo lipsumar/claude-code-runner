@@ -59,6 +59,18 @@ const emojiByStatus = {
     </div>
   </div>
 
+  <div v-if="stepEntry.type === 'grep'">
+    <div class="bg-gray-100 rounded-lg">
+      <div class="text-sm mb-1">
+        Grep: <span class="font-mono">{{ stepEntry.pattern }}</span> in
+        <span class="font-mono">{{ stepEntry.path }}</span>
+      </div>
+    </div>
+    <div class="bg-gray-200 p-2 rounded-lg">
+      <div class="font-mono whitespace-pre-wrap">{{ stepEntry.content }}</div>
+    </div>
+  </div>
+
   <div v-if="stepEntry.type === 'todoCreate'">
     <ul>
       <li v-for="item in stepEntry.todos" :key="item.id">
