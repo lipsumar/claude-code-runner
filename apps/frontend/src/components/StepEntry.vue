@@ -46,6 +46,19 @@ const emojiByStatus = {
   <ReadOrWriteEntry v-if="stepEntry.type === 'read'" :entry="stepEntry" type="read" />
   <ReadOrWriteEntry v-if="stepEntry.type === 'write'" :entry="stepEntry" type="write" />
 
+  <div v-if="stepEntry.type === 'edit'">
+    <div class="bg-gray-100 rounded-lg">
+      <div class="text-sm mb-1">Edit: {{ stepEntry.filePath }}</div>
+    </div>
+    <!-- First a redish div with oldString, then a greenish with newString -->
+    <div class="bg-red-100 p-2 rounded-lg mb-2">
+      <div class="font-mono text-red-600 whitespace-pre-wrap">{{ stepEntry.oldString }}</div>
+    </div>
+    <div class="bg-green-100 p-2 rounded-lg">
+      <div class="font-mono text-green-600 whitespace-pre-wrap">{{ stepEntry.newString }}</div>
+    </div>
+  </div>
+
   <div v-if="stepEntry.type === 'todoCreate'">
     <ul>
       <li v-for="item in stepEntry.todos" :key="item.id">

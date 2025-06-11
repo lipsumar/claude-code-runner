@@ -74,3 +74,18 @@ export function isWriteInput(value: unknown): value is WriteInput {
 
   return isString(obj.file_path) && isString(obj.content);
 }
+
+export type EditInput = {
+  file_path: string;
+  old_string: string;
+  new_string: string;
+};
+export function isEditInput(value: unknown): value is EditInput {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  return isString(obj.file_path) && isString(obj.old_string) && isString(obj.new_string);
+}

@@ -7,6 +7,7 @@ import type {
 } from 'backend';
 import {
   isBashInput,
+  isEditInput,
   isReadInput,
   isTodoInput,
   isWriteInput,
@@ -48,6 +49,12 @@ export type WriteStepEntry = {
   filePath: string;
   content: string;
 };
+export type EditStepEntry = {
+  type: 'edit';
+  filePath: string;
+  oldString: string;
+  newString: string;
+};
 
 export type StepEntry =
   | TextStepEntry
@@ -56,6 +63,7 @@ export type StepEntry =
   | BashStepEntry
   | ReadStepEntry
   | WriteStepEntry
+  | EditStepEntry
   | InternalUpdateEntry;
 
 export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEntry[] {
@@ -151,6 +159,19 @@ export function messageToStepEntries(wrappedMessages: WrappedMessage[]): StepEnt
         type: 'write',
         filePath: block.input.file_path,
         content: block.input.content,
+      });
+      continue;
+    }
+
+    if (block.type === 'tool_use' && block.name === 'Edit') {
+      if (!isEditInput(block.input)) {
+        throw new Error('tool_use: Edit: unexpected input');
+      }
+      entries.push({
+        type: 'edit',
+        filePath: block.input.file_path,
+        oldString: block.input.old_string,
+        newString: block.input.new_string,
       });
       continue;
     }
